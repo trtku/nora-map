@@ -123,7 +123,7 @@ button{font:inherit;color:inherit}
 }
 #panel.open ~ #locate{display:none}
 @media (min-width:900px){ #locate{bottom:1.5rem} #panel.open ~ #locate{display:block} }
-#locate[hidden]{display:none!important}
+[hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){ #panel,.pin{transition:none} }
 </style>
 </head>
@@ -489,6 +489,13 @@ async function initMap(){
   map.fitBounds(b, wide ? 60 : {top:60,left:30,right:30,bottom:Math.round(window.innerHeight*0.48)});
   if(current>=0) select(current,{push:false});
   $("#locate").hidden = false;
+  let loaded=false;
+  google.maps.event.addListenerOnce(map,"tilesloaded",()=>{ loaded=true; });
+  setTimeout(()=>{ if(!loaded && $("#nokey").hidden){
+    const n=$("#nokey");
+    n.innerHTML=`<p style="max-width:30em;margin:0">地図の読み込みが完了していません。通信状況を確認するか、ブラウザのコンソールに出ているエラーを確認してください。</p>`;
+    n.hidden=false; n.style.zIndex=1; n.style.pointerEvents="none";
+  }},10000);
 }
 function locate(){
   const btn=$("#locate"); if(!navigator.geolocation||!map) return;
