@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>野良展示 作品マップ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --paper:#f4f6f2; --surface:#ffffff; --ink:#1f2b26; --muted:#5d6a63; --line:#d3dad0;
+  --river:#2c6e8f; --river-ink:#ffffff; --moss:#4f7d32; --warn:#9a3b2a;
+  --shadow:0 -6px 24px rgba(20,35,28,.12);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme: dark;
+    --paper:#111916; --surface:#18221e; --ink:#e4ebe6; --muted:#9aa8a0; --line:#2c3a34;
+    --river:#74b6d6; --river-ink:#0d1a20; --moss:#9cc27a; --warn:#e59a86;
+    --shadow:0 -6px 24px rgba(0,0,0,.4);
+  }
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{
+  font-family:"Zen Kaku Gothic New","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.7; -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--river);outline-offset:2px}
+
+#map{position:fixed;inset:0;background:var(--paper)}
+#nokey{
+  position:fixed;inset:0;display:grid;place-items:center;padding:2rem 1.5rem 60vh;
+  color:var(--muted);font-size:.9rem;text-align:center;
+}
+#nokey code{background:var(--surface);padding:.1em .4em;border-radius:4px;border:1px solid var(--line)}
+
+/* ---- panel: bottom sheet on phones, side panel on wide screens ---- */
+#panel{
+  position:fixed;left:0;right:0;bottom:0;z-index:2;
+  max-height:46vh;display:flex;flex-direction:column;
+  background:var(--surface);border-top:1px solid var(--line);
+  border-radius:18px 18px 0 0;box-shadow:var(--shadow);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  transition:max-height .28s ease;
+}
+#panel.open{max-height:72vh}
+@media (min-width:900px){
+  #panel,#panel.open{
+    top:0;right:auto;width:420px;max-height:none;border-radius:0;
+    border-top:0;border-right:1px solid var(--line);box-shadow:none;
+    padding-top:env(safe-area-inset-top,0px);
+  }
+  #map{left:420px}
+  #nokey{left:420px;padding-bottom:2rem}
+}
+.bar{display:flex;align-items:flex-start;gap:1rem;padding:1rem 1.25rem .5rem}
+.bar h1{font-size:1.15rem;font-weight:700;margin:0;letter-spacing:.02em;line-height:1.35}
+.bar p{margin:.1rem 0 0;font-size:.8rem;color:var(--muted)}
+.lang{
+  margin-left:auto;flex:none;border:1px solid var(--line);background:transparent;
+  border-radius:999px;padding:.25rem .8rem;font-size:.8rem;cursor:pointer;
+}
+
+#rail{display:flex;gap:.5rem;overflow-x:auto;padding:.5rem 1.25rem .9rem;scrollbar-width:none}
+#rail::-webkit-scrollbar{display:none}
+.chip{
+  flex:none;width:2.6rem;height:2.6rem;border-radius:50%;
+  border:1.5px solid var(--ink);background:var(--surface);
+  font-weight:700;font-size:1rem;cursor:pointer;display:grid;place-items:center;
+}
+.chip[aria-current="true"]{background:var(--river);border-color:var(--river);color:var(--river-ink)}
+
+.scroll{overflow-y:auto;padding:0 1.25rem 1.25rem;flex:1;min-height:0}
+.intro p{margin:.2rem 0 .9rem;font-size:.9rem;color:var(--muted)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  border-radius:10px;padding:.6rem 1rem;font-size:.9rem;font-weight:500;
+  text-decoration:none;cursor:pointer;border:1.5px solid var(--ink);background:transparent;color:var(--ink);
+}
+.btn.primary{background:var(--river);border-color:var(--river);color:var(--river-ink)}
+
+/* ---- work card ---- */
+.card{padding-top:.4rem}
+.card .num{font-size:3.2rem;font-weight:700;line-height:1;color:var(--river);font-variant-numeric:tabular-nums}
+.card h2{font-size:1.35rem;margin:.6rem 0 0;line-height:1.4;font-weight:700}
+.card .sub{margin:.1rem 0 0;color:var(--muted);font-size:.85rem}
+.card .artist{margin:.6rem 0 0;font-size:1rem;font-weight:500}
+.card .meta{margin:.2rem 0 0;font-size:.8rem;color:var(--muted)}
+.touch{display:inline-block;margin-top:.8rem;font-size:.8rem;font-weight:700;padding:.15rem .6rem;border-radius:6px;border:1.5px solid currentColor}
+.touch.no{color:var(--warn)}
+.touch.ok{color:var(--moss)}
+.caption{margin:1rem 0 0;white-space:pre-line;font-size:.95rem;max-width:36em}
+.caption:lang(en){line-height:1.6}
+.actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.2rem}
+.next{
+  display:flex;align-items:center;gap:.9rem;width:100%;margin-top:1.4rem;padding:.8rem 1rem;
+  border:1.5px solid var(--line);border-radius:12px;background:transparent;text-align:left;cursor:pointer;
+}
+.next .n{font-weight:700;font-size:1.4rem;color:var(--river);min-width:1.6rem}
+.next small{display:block;color:var(--muted);font-size:.75rem}
+.next strong{display:block;font-weight:500}
+.prevlink{margin-top:.6rem;background:none;border:0;padding:.2rem 0;color:var(--muted);font-size:.8rem;cursor:pointer;text-decoration:underline}
+
+/* ---- map markers ---- */
+.pin{
+  display:grid;place-items:center;width:30px;height:30px;border-radius:50%;
+  background:#1f2b26;color:#fff;font:700 14px/1 "Zen Kaku Gothic New",sans-serif;
+  border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);cursor:pointer;
+  transition:transform .15s ease;
+}
+.pin.active{background:#2c6e8f;transform:scale(1.35)}
+.me{width:16px;height:16px;border-radius:50%;background:#2f7de1;border:3px solid #fff;box-shadow:0 0 0 6px rgba(47,125,225,.2)}
+#locate{
+  position:fixed;right:1rem;z-index:1;bottom:calc(46vh + 1rem);
+  border:1px solid var(--line);background:var(--surface);border-radius:999px;
+  padding:.45rem .9rem;font-size:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+#panel.open ~ #locate{display:none}
+@media (min-width:900px){ #locate{bottom:1.5rem} #panel.open ~ #locate{display:block} }
+#locate[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){ #panel,.pin{transition:none} }
+</style>
+</head>
+<body>
+<div id="map" role="region" aria-label="作品マップ"></div>
+<div id="nokey" hidden></div>
+
+<aside id="panel">
+  <header class="bar">
+    <div><h1 id="title"></h1><p id="subtitle"></p></div>
+    <button class="lang" id="lang" type="button"></button>
+  </header>
+  <nav id="rail" aria-label="作品"></nav>
+  <div class="scroll" id="body"></div>
+</aside>
+<button id="locate" type="button" hidden></button>
+
+<script>
+/* ================= 設定 ================= */
+const CONFIG = {
+  // Google Maps JavaScript API のキー。未設定でもキャプション一覧としては動きます。
+  GOOGLE_MAPS_API_KEY: "AIzaSyCWQujgwVRKV1cuKlc9-otNPkpm1p0nqdw",
+  // Cloud Console で作った Map ID（地図スタイル用）。無ければ "DEMO_MAP_ID" のままで可。
+  MAP_ID: "DEMO_MAP_ID",
+  // スプレッドシート「作品データ」タブのCSV URL（ファイル > 共有 > ウェブに公開 > CSV）。
+  // 空のとき、または読み込みに失敗したときは下の埋め込みデータを使います。
+  SHEET_CSV_URL: "",
+  // true: 公開=FALSE の作品も表示（準備中の確認用）。本番では false に。
+  SHOW_UNPUBLISHED: true,
+  TITLE: { ja: "野良展示", en: "Nora Exhibition" },
+  SUBTITLE: { ja: "大手町 屋外展示マップ", en: "Outdoor works in Otemachi" },
+};
+
+/* スプレッドシートの内容（2026-10-14 時点）。SHEET_CSV_URL を設定すれば最新が優先されます。 */
+const EMBEDDED_WORKS = [
+ {
+  "id": "01",
+  "order": "1",
+  "published": "FALSE",
+  "lat": "35.688722",
+  "lng": "139.765611",
+  "artist_ja": "後藤拓真",
+  "artist_en": "Takuma Goto",
+  "title_ja": "スピグラ",
+  "title_en": "SPIN GRAPHIC",
+  "year": "",
+  "material_ja": "",
+  "material_en": "",
+  "size": "",
+  "touch": "触れてOK",
+  "caption_ja": "クルクル回すことで、立体に描かれた柄がコロコロと入れ替わり、さまざまなグラフィックを楽しめる。自由に触れて遊びながら、自分の手で柄を変化させる楽しさを持った、大人も遊べる遊具的な作品。",
+  "caption_en": "spinning the object, patterns shift to create different graphics. A playful object that invites people to touch, spin, and change the patterns, offering an interactive experience for adults and children."
+ },
+ {
+  "id": "02",
+  "order": "2",
+  "published": "FALSE",
+  "lat": "35.688694",
+  "lng": "139.765667",
+  "artist_ja": "後藤宙",
+  "artist_en": "Kanata Goto",
+  "title_ja": "隆起と構造",
+  "title_en": "Uplift and Structure",
+  "year": "",
+  "material_ja": "",
+  "material_en": "",
+  "size": "",
+  "touch": "接触禁止",
+  "caption_ja": "作品の表面に生じる隆起は、それを支える構造によって形づくられている。静止したその形は、内側から押し上げられている途中なのか。それとも隆起を終えた後なのか。数百万年をかけて隆起したアルプスのように、動かないものに私たちはどこまで過去の運動を想像できるだろうか。",
+  "caption_en": "The work’s surface is shaped by a structure beneath it. Is it still rising from within, or has the uplift already ended? Like the Alps, formed over millions of years, can we imagine past movement in something that appears still?"
+ },
+ {
+  "id": "03",
+  "order": "3",
+  "published": "FALSE",
+  "lat": "35.688694",
+  "lng": "139.765722",
+  "artist_ja": "millet",
+  "artist_en": "millet",
+  "title_ja": "切り取られた人",
+  "title_en": "A Cropped Person",
+  "year": "",
+  "material_ja": "",
+  "material_en": "",
+  "size": "",
+  "touch": "接触禁止",
+  "caption_ja": "高さの認知は地によって消えます\nビルの階層でも地下鉄の中でも高さの感覚って感じないそれって変だけど変じゃないか、今どこかにいる人を切り取ってきました。\n高さを認知したかな？/",
+  "caption_en": "The perception of height disappears with the ground.\n\nBetween floors, underground,\nheight becomes difficult to perceive.\n\nStrange, but not entirely strange.\n\nI have cut out a person from somewhere,\nfrom where they are now.\n\nWas the height perceived?"
+ },
+ {
+  "id": "04",
+  "order": "4",
+  "published": "FALSE",
+  "lat": "35.688667",
+  "lng": "139.765972",
+  "artist_ja": "中村香乃",
+  "artist_en": "Kano Nakamura",
+  "title_ja": "あわいのゆらぎ",
+  "title_en": "A Wavering in the Interstice",
+  "year": "",
+  "material_ja": "",
+  "material_en": "",
+  "size": "",
+  "touch": "接触禁止",
+  "caption_ja": "風や、人の通り道。\n\n人工的なものと自然が複雑に混じり合い、\nそのあわいのような場所が生まれている。\n\n人と自然が生み出す、\n小さな空間の揺らぎ。\n通り道を形づくる縁石の形を拾い上げ、\n光のオブジェとして浮かび上がらせる。",
+  "caption_en": "Wind, and the paths people take.\n\nArtificial and natural elements intertwine,\ncreating spaces somewhere in between.\n\nSubtle shifts shaped by people and nature.\nPicking up the forms of curbs along these paths,\nI bring them into view through light."
+ },
+ {
+  "id": "05",
+  "order": "5",
+  "published": "FALSE",
+  "lat": "35.688639",
+  "lng": "139.766083",
+  "artist_ja": "清藤光",
+  "artist_en": "Hikaru Seitoh",
+  "title_ja": "Nature, Human, All in One Box",
+  "title_en": "Nature, Human, All in One Box",
+  "year": "",
+  "material_ja": "",
+  "material_en": "",
+  "size": "",
+  "touch": "接触禁止",
+  "caption_ja": "指紋をよく見ると熱帯魚の模様に、葉脈を辿ると動物の血管にも見えてくる。人、植物、動物は異なる姿を持ちながら、共通する構造や法則のもとに成り立っている。風もまた、目には見えない自然のエネルギーの現れである。この箱はその風を受け、弦の振動を通して音へと変換する。異なる形や現象は、姿を変えながらつながっている。",
+  "caption_en": "Look closely at a fingerprint, and it may resemble the patterns of a tropical fish; trace the veins of a leaf, and they may evoke an animal’s blood vessels. Humans, plants, and animals take different forms, yet share underlying structures and principles. Wind, too, is an invisible expression of natural energy. This box receives the wind and transforms it into sound through the vibration of strings. Different forms and phenomena remain connected as they shift from one state to another."
+ },
+ {
+  "id": "06",
+  "order": "6",
+  "published": "FALSE",
+  "lat": "35.688611",
+  "lng": "139.766194",
+  "artist_ja": "清水領真",
+  "artist_en": "Ryoma Shimizu",
+  "title_ja": "Metron",
+  "title_en": "Metron",
+  "year": "",
+  "material_ja": "",
+  "material_en": "",
+  "size": "",
+  "touch": "接触禁止",
+  "caption_ja": "大手町の緑道から見える巨大な都市構造は、精密で有機的に絡み合いながら、人の気配を静かに包み込んでいる。そこでは時間が絶えず流れる一方、どこか止まっているようにも感じられる。「Metron」は、そんな都市に流れる曖昧な時間のリズムを、カチカチと刻む音とわずかな揺れによって可視化する。人の呼吸、都市の心拍。その境界にある静寂を動かす。",
+  "caption_en": "From the greenway in Otemachi, the city appears as a vast and precise structure, quietly enclosing traces of human life. Time seems to flow endlessly, yet somehow remains still. “Metron” visualizes this ambiguous rhythm through subtle movement and the ticking of a clock—like a human breath, or the heartbeat of a city. It sets the silence into motion."
+ },
+ {
+  "id": "07",
+  "order": "7",
+  "published": "FALSE",
+  "lat": "35.688611",
+  "lng": "139.766306",
+  "artist_ja": "さかたまき",
+  "artist_en": "Maki Sakata",
+  "title_ja": "こくこく、ゆらゆら",
+  "title_en": "Kokukoku, Yurayura — Moment by Moment, Rippling",
+  "year": "",
+  "material_ja": "",
+  "material_en": "",
+  "size": "",
+  "touch": "接触禁止",
+  "caption_ja": "公園の水たまりのように、空や光、通りかかる人を写し込む器を作りました。散歩道の途中の余白のようなものです。\n整えられ、変化がならされ見えにくい道で、ゆるやかな移ろいを拾うような。\n立ち止まってぼーっとしたり、映るものを面白がったりしながら、この道で過ごす流れる時間を感じられたらと思います。",
+  "caption_en": "Like a puddle in a park, I placed a vessel that holds the sky, the light, and the people passing by. It is something like a margin along the walking path.\nOn a path that is carefully tended, where change is smoothed out and hard to see, it gathers the gentle shifts that pass through.\nI hope that, as you pause to daydream or take delight in what is reflected, you can feel the time you spend on this path flowing by."
+ },
+ {
+  "id": "08",
+  "order": "8",
+  "published": "FALSE",
+  "lat": "35.689361",
+  "lng": "139.765472",
+  "artist_ja": "近藤ののか",
+  "artist_en": "Nonoka Kondo",
+  "title_ja": "大きな東京迷子ちゃん",
+  "title_en": "Big Tokyo Lost Children",
+  "year": "",
+  "material_ja": "",
+  "material_en": "",
+  "size": "",
+  "touch": "接触禁止",
+  "caption_ja": "夕暮れの帰り道は薄桃色の夕陽で街が照らされて、道が上下左右に道がたくさん続く東京は、ぼんやりした頭にまるで異国のように映るときがあります。街と自分の境界が薄くなってふわふわと空に浮かんでしまうような意識の状態を「迷子ちゃん」と名付けて、作品として東京の空に浮かばせたのが大きな東京迷子ちゃんです。",
+  "caption_en": "At dusk, Tokyo’s pink-lit streets feel foreign to my hazy mind. When the line between me and the city fades, I feel afloat. I call this “Maigo-chan” and place it in the sky as Big Tokyo Lost Children."
+ },
+ {
+  "id": "09",
+  "order": "9",
+  "published": "FALSE",
+  "lat": "35.689611",
+  "lng": "139.765500",
+  "artist_ja": "小林健太郎",
+  "artist_en": "Kentaro Kobayashi",
+  "title_ja": "素敵に能天気",
+  "title_en": "Happy-go-lucky Guy",
+  "year": "",
+  "material_ja": "",
+  "material_en": "",
+  "size": "",
+  "touch": "接触禁止",
+  "caption_ja": "最初は映り込んだ自分に目が行くかもしれませんが、建物や植物、空を含めた「今いる環境」全体が映り込んでいることに気づきます。\n\nコンセプトは「自分自身と、その属する環境の回顧」です。\nこの作品と対峙したとき、自分自身だけでなく、今いる環境を見つめる機会を作品にしようと制作しました。",
+  "caption_en": "At first, you may notice yourself, but gradually realize that the entire environment is reflected. The concept is “revisiting oneself and one’s environment,” inviting us to look beyond ourselves at the world around us."
+ }
+];
+
+/* ================= 文言 ================= */
+const T = {
+  ja:{ toggle:"EN", intro:"番号の順に歩くと、9つの作品をひと巡りできます。番号を選ぶか、地図のピンをタップしてください。",
+       start:"最初の作品から見る", access:"1番の作品までの道順（Googleマップ）",
+       nav:"ここまでの道順", next:"次の作品", prev:"前の作品に戻る", last:"最後の作品です。ご覧いただきありがとうございました。",
+       toFirst:"最初の作品へ戻る", walk:(m)=>`約${m}m・徒歩${Math.max(1,Math.round(m/70))}分`,
+       no:"作品に触れないでください", ok:"触れて楽しめます", locate:"現在地", locating:"取得中…", locFail:"現在地を取得できませんでした",
+       nokey:"地図を表示するには、ファイル内の <code>GOOGLE_MAPS_API_KEY</code> を設定してください。キャプションはこのまま見られます。" },
+  en:{ toggle:"日本語", intro:"Follow the numbers to walk through all nine works. Pick a number or tap a pin on the map.",
+       start:"Start with the first work", access:"Directions to work 1 (Google Maps)",
+       nav:"Directions here", next:"Next work", prev:"Back to previous work", last:"This is the last work. Thank you for visiting.",
+       toFirst:"Back to the first work", walk:(m)=>`About ${m} m, ${Math.max(1,Math.round(m/70))} min walk`,
+       no:"Please do not touch", ok:"Touch and play", locate:"My location", locating:"Locating…", locFail:"Could not get your location",
+       nokey:"Set <code>GOOGLE_MAPS_API_KEY</code> in this file to show the map. Captions work without it." },
+};
+
+/* ================= 状態 ================= */
+let works = [], lang = "ja", current = -1;
+let map = null, markers = [], meMarker = null, AdvancedMarker = null;
+const $ = (s) => document.querySelector(s);
+const panel = $("#panel");
+
+try { lang = localStorage.getItem("nora-lang") || (navigator.language.startsWith("ja") ? "ja" : "en"); } catch { lang = "ja"; }
+
+/* ================= データ ================= */
+function parseCSV(text){
+  const rows=[]; let row=[], f="", q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){f+='"';i++;} else q=false; } else f+=c; }
+    else if(c==='"') q=true;
+    else if(c===','){ row.push(f); f=""; }
+    else if(c==='\n'||c==='\r'){ if(c==='\r'&&text[i+1]==='\n') i++; row.push(f); rows.push(row); row=[]; f=""; }
+    else f+=c;
+  }
+  if(f!==""||row.length){ row.push(f); rows.push(row); }
+  return rows;
+}
+async function loadWorks(){
+  let list = EMBEDDED_WORKS;
+  if(CONFIG.SHEET_CSV_URL){
+    try{
+      const res = await fetch(CONFIG.SHEET_CSV_URL, {cache:"no-store"});
+      if(!res.ok) throw new Error(res.status);
+      const rows = parseCSV(await res.text());
+      const hi = rows.findIndex(r => r[0] === "id");
+      if(hi < 0) throw new Error("header row not found");
+      const h = rows[hi];
+      const parsed = rows.slice(hi+1).filter(r => r[0]).map(r => Object.fromEntries(h.map((k,i)=>[k, r[i] ?? ""])));
+      if(parsed.length) list = parsed;
+    }catch(e){ console.warn("Sheet load failed, using embedded data:", e); }
+  }
+  return list
+    .map(w => ({...w, lat:parseFloat(w.lat), lng:parseFloat(w.lng), order:parseInt(w.order,10)}))
+    .filter(w => Number.isFinite(w.lat) && Number.isFinite(w.lng))
+    .filter(w => CONFIG.SHOW_UNPUBLISHED || String(w.published).toUpperCase() === "TRUE")
+    .sort((a,b) => a.order - b.order);
+}
+
+/* ================= ユーティリティ ================= */
+function meters(a,b){
+  const R=6371000, toR=Math.PI/180, la=(a.lat+b.lat)/2*toR;
+  const dx=(b.lng-a.lng)*toR*R*Math.cos(la), dy=(b.lat-a.lat)*toR*R;
+  return Math.max(5, Math.round(Math.hypot(dx,dy)/5)*5);
+}
+const pick = (w,k) => (lang==="en" && w[k+"_en"]) ? w[k+"_en"] : (w[k+"_ja"] || w[k+"_en"] || "");
+const navURL = (w) => `https://www.google.com/maps/dir/?api=1&destination=${w.lat},${w.lng}&travelmode=walking`;
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ================= 描画 ================= */
+function renderChrome(){
+  document.documentElement.lang = lang;
+  $("#title").textContent = CONFIG.TITLE[lang];
+  $("#subtitle").textContent = CONFIG.SUBTITLE[lang];
+  $("#lang").textContent = T[lang].toggle;
+  $("#locate").textContent = T[lang].locate;
+  $("#rail").innerHTML = works.map((w,i)=>
+    `<button class="chip" type="button" data-i="${i}" aria-label="${w.order}. ${esc(pick(w,"title"))}" ${i===current?'aria-current="true"':""}>${w.order}</button>`
+  ).join("");
+}
+function renderIntro(){
+  const t=T[lang], first=works[0];
+  $("#body").innerHTML = `<div class="intro">
+    <p>${t.intro}</p>
+    <div class="actions">
+      <button class="btn primary" type="button" data-go="0">${t.start}</button>
+      ${first?`<a class="btn" href="${navURL(first)}" target="_blank" rel="noopener">${t.access}</a>`:""}
+    </div></div>`;
+}
+function renderCard(i){
+  const t=T[lang], w=works[i], nx=works[i+1], pv=works[i-1];
+  const titleMain = pick(w,"title"), titleOther = lang==="ja" ? w.title_en : w.title_ja;
+  const meta = [w.year, pick(w,"material"), w.size].filter(Boolean).join("、");
+  const touch = w.touch ? (w.touch.includes("OK") ? `<span class="touch ok">${t.ok}</span>` : `<span class="touch no">${t.no}</span>`) : "";
+  const cap = pick(w,"caption");
+  $("#body").innerHTML = `<article class="card">
+      <div class="num" aria-hidden="true">${w.order}</div>
+      <h2>${esc(titleMain)}</h2>
+      ${titleOther && titleOther!==titleMain ? `<p class="sub">${esc(titleOther)}</p>`:""}
+      <p class="artist">${esc(pick(w,"artist"))}</p>
+      ${meta?`<p class="meta">${esc(meta)}</p>`:""}
+      ${touch}
+      <p class="caption" lang="${lang==="en"&&w.caption_en?"en":"ja"}">${esc(cap)}</p>
+      <div class="actions"><a class="btn" href="${navURL(w)}" target="_blank" rel="noopener">${t.nav}</a></div>
+      ${nx ? `<button class="next" type="button" data-go="${i+1}">
+                <span class="n">${nx.order}</span>
+                <span><small>${t.next}　${t.walk(meters(w,nx))}</small><strong>${esc(pick(nx,"title"))}</strong></span>
+              </button>`
+           : `<p class="meta" style="margin-top:1.4rem">${t.last}</p>
+              <button class="next" type="button" data-go="0"><span class="n">${works[0].order}</span><span><strong>${t.toFirst}</strong></span></button>`}
+      ${pv ? `<button class="prevlink" type="button" data-go="${i-1}">${t.prev}</button>`:""}
+    </article>`;
+  $("#body").scrollTop = 0;
+}
+function select(i, {pan=true, push=true}={}){
+  current = i;
+  panel.classList.toggle("open", i>=0);
+  renderChrome();
+  if(i<0){ renderIntro(); }
+  else{
+    renderCard(i);
+    const chip = $(`.chip[data-i="${i}"]`); chip && chip.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"});
+    if(push) history.replaceState(null,"",`#${works[i].id}`);
+  }
+  markers.forEach((m,k)=>{ m.content.classList.toggle("active", k===i); m.zIndex = k===i ? 10 : 1; });
+  if(map && pan && i>=0) panTo(works[i]);
+}
+function panTo(w){
+  map.panTo({lat:w.lat,lng:w.lng});
+  if(map.getZoom() < 19) map.setZoom(19);
+  if(window.innerWidth < 900) map.panBy(0, Math.round(window.innerHeight*0.25));
+}
+
+/* ================= 地図 ================= */
+function loadMapsAPI(key){
+  // Google 公式の動的ローダー
+  (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({key, v:"weekly", language:lang, region:"JP"});
+}
+async function initMap(){
+  const key = CONFIG.GOOGLE_MAPS_API_KEY;
+  if(!key || key==="YOUR_API_KEY"){ const n=$("#nokey"); n.innerHTML=`<p style="max-width:28em;margin:0">${T[lang].nokey}</p>`; n.hidden=false; return; }
+  loadMapsAPI(key);
+  const { Map, Polyline } = await google.maps.importLibrary("maps");
+  ({ AdvancedMarkerElement: AdvancedMarker } = await google.maps.importLibrary("marker"));
+  const core = await google.maps.importLibrary("core");
+  const opts = { mapId:CONFIG.MAP_ID, center:{lat:works[0].lat,lng:works[0].lng}, zoom:18,
+                 disableDefaultUI:true, zoomControl:true, clickableIcons:false, gestureHandling:"greedy" };
+  if(core.ColorScheme) opts.colorScheme = core.ColorScheme.FOLLOW_SYSTEM;
+  map = new Map($("#map"), opts);
+
+  // 順路（作品同士を直線でつないだ目安。実際の歩行ルートではありません）
+  new Polyline({ map, path: works.map(w=>({lat:w.lat,lng:w.lng})), strokeOpacity:0,
+    icons:[{ icon:{ path:"M 0,-1 0,1", strokeOpacity:.9, strokeColor:"#2c6e8f", scale:3 }, offset:"0", repeat:"12px" }] });
+
+  markers = works.map((w,i)=>{
+    const el = document.createElement("div"); el.className="pin"; el.textContent=w.order;
+    const m = new AdvancedMarker({ map, position:{lat:w.lat,lng:w.lng}, content:el, title:`${w.order}. ${w.title_ja}`, gmpClickable:true });
+    m.addListener("gmp-click", ()=>select(i));
+    return m;
+  });
+
+  const b = new google.maps.LatLngBounds(); works.forEach(w=>b.extend({lat:w.lat,lng:w.lng}));
+  const wide = window.innerWidth >= 900;
+  map.fitBounds(b, wide ? 60 : {top:60,left:30,right:30,bottom:Math.round(window.innerHeight*0.48)});
+  if(current>=0) select(current,{push:false});
+  $("#locate").hidden = false;
+}
+function locate(){
+  const btn=$("#locate"); if(!navigator.geolocation||!map) return;
+  btn.textContent=T[lang].locating;
+  navigator.geolocation.getCurrentPosition(p=>{
+    const pos={lat:p.coords.latitude,lng:p.coords.longitude};
+    if(!meMarker){ const el=document.createElement("div"); el.className="me"; meMarker=new AdvancedMarker({map,position:pos,content:el,zIndex:5}); }
+    else meMarker.position=pos;
+    map.panTo(pos); btn.textContent=T[lang].locate;
+  },()=>{ btn.textContent=T[lang].locFail; setTimeout(()=>btn.textContent=T[lang].locate,2500); },{enableHighAccuracy:true,timeout:10000});
+}
+
+// APIキーの認証に失敗したとき Google から呼ばれる
+window.gm_authFailure = () => {
+  const n=$("#nokey");
+  n.innerHTML = `<p style="max-width:30em;margin:0">地図を読み込めませんでした（APIキーの認証エラー）。<br>
+    ブラウザのコンソールに表示されるエラー名を確認してください。<br>
+    RefererNotAllowedMapError：キーのウェブサイト制限にこのページのURLが含まれていません。<br>
+    ApiNotActivatedMapError：Maps JavaScript API が有効になっていません。<br>
+    BillingNotEnabledMapError：請求先アカウントが紐づいていません。<br>
+    InvalidKeyMapError：キーの文字列が正しくありません。</p>`;
+  n.hidden=false; n.style.zIndex=1; n.style.background="var(--paper)";
+  $("#locate").hidden=true;
+};
+
+/* ================= イベント ================= */
+document.addEventListener("click",(e)=>{
+  const chip=e.target.closest(".chip"); if(chip){ select(+chip.dataset.i); return; }
+  const go=e.target.closest("[data-go]"); if(go){ select(+go.dataset.go); return; }
+});
+$("#lang").addEventListener("click",()=>{
+  lang = lang==="ja" ? "en" : "ja";
+  try{ localStorage.setItem("nora-lang",lang); }catch{}
+  select(current,{pan:false,push:false});
+});
+$("#locate").addEventListener("click",locate);
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="Escape" && current>=0){ history.replaceState(null,"",location.pathname); select(-1); }
+  if(current>=0 && e.key==="ArrowRight" && current<works.length-1) select(current+1);
+  if(current>=0 && e.key==="ArrowLeft" && current>0) select(current-1);
+});
+window.addEventListener("hashchange",()=>{
+  const i=works.findIndex(w=>`#${w.id}`===location.hash); if(i>=0 && i!==current) select(i,{push:false});
+});
+
+/* ================= 起動 ================= */
+(async()=>{
+  works = await loadWorks();
+  const i = works.findIndex(w=>`#${w.id}`===location.hash);
+  select(i, {pan:false, push:false});
+  try{ await initMap(); }catch(e){ console.error(e); const n=$("#nokey"); n.textContent="地図を読み込めませんでした。APIキーと参照元の制限を確認してください。"; n.hidden=false; }
+})();
+</script>
+</body>
+</html>
