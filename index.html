@@ -130,12 +130,11 @@ button{font:inherit;color:inherit}
 }
 .me{position:absolute;left:-8px;top:-8px;width:16px;height:16px;border-radius:50%;background:#2f7de1;border:3px solid #fff;box-shadow:0 0 0 6px rgba(47,125,225,.2)}
 #locate{
-  position:fixed;right:1rem;z-index:1;bottom:calc(46vh + 1rem);
-  border:1px solid var(--line);background:var(--surface);border-radius:999px;
-  padding:.45rem .9rem;font-size:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12);
+  margin:10px;border:0;background:#fff;color:#1f2b26;border-radius:8px;
+  padding:.5rem .85rem;font-size:.8rem;font-weight:500;cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,.3);
 }
-#panel.open ~ #locate{display:none}
-@media (min-width:900px){ #locate{bottom:1.5rem} #panel.open ~ #locate{display:block} }
+@media (prefers-color-scheme: dark){ #locate{background:#18221e;color:#e4ebe6} }
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){ #panel,.pin{transition:none} }
 </style>
@@ -474,42 +473,47 @@ function loadMapsAPI(key){
   (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({key, v:"weekly", language:lang, region:"JP"});
 }
 /* シンプルな地図スタイル：店舗・駅・道路標識などを消し、川・緑道・建物の形だけを残す */
+/* シンプルな地図スタイル：店舗・駅・道路名などを消し、川・緑道・歩行路・建物の形を残す */
 const MAP_STYLE = {
   light: [
-    { elementType:"geometry", stylers:[{color:"#f1f3ef"}] },
     { elementType:"labels.icon", stylers:[{visibility:"off"}] },
     { elementType:"labels.text.fill", stylers:[{color:"#8a948e"}] },
-    { elementType:"labels.text.stroke", stylers:[{color:"#f1f3ef"}] },
+    { elementType:"labels.text.stroke", stylers:[{color:"#f2f4f0"}] },
+    { featureType:"landscape", elementType:"geometry", stylers:[{color:"#f2f4f0"}] },
+    { featureType:"landscape.man_made", elementType:"geometry.fill", stylers:[{color:"#e4e8e1"}] },
+    { featureType:"landscape.man_made", elementType:"geometry.stroke", stylers:[{color:"#d2d8cf"}] },
+    { featureType:"landscape.natural.landcover", elementType:"geometry", stylers:[{color:"#d3e4c8"}] },
     { featureType:"poi", stylers:[{visibility:"off"}] },
     { featureType:"poi.park", stylers:[{visibility:"on"}] },
-    { featureType:"poi.park", elementType:"geometry", stylers:[{color:"#dde8d5"}] },
-    { featureType:"poi.park", elementType:"labels", stylers:[{visibility:"off"}] },
+    { featureType:"poi.park", elementType:"geometry", stylers:[{color:"#d3e4c8"}] },
+    { featureType:"poi.park", elementType:"labels.text.fill", stylers:[{color:"#5f7f4f"}] },
     { featureType:"transit", stylers:[{visibility:"off"}] },
     { featureType:"administrative", elementType:"labels", stylers:[{visibility:"off"}] },
-    { featureType:"landscape.man_made", elementType:"geometry.fill", stylers:[{color:"#e6e9e3"}] },
-    { featureType:"landscape.man_made", elementType:"geometry.stroke", stylers:[{color:"#d6dbd3"}] },
-    { featureType:"road", elementType:"geometry", stylers:[{color:"#ffffff"}] },
+    { featureType:"road", elementType:"geometry.fill", stylers:[{color:"#ffffff"}] },
+    { featureType:"road", elementType:"geometry.stroke", stylers:[{color:"#cdd4ca"}] },
     { featureType:"road", elementType:"labels", stylers:[{visibility:"off"}] },
-    { featureType:"road.highway", elementType:"geometry", stylers:[{color:"#e3e6e1"}] },
-    { featureType:"water", elementType:"geometry", stylers:[{color:"#cfe0e8"}] },
+    { featureType:"road.highway", elementType:"geometry.fill", stylers:[{color:"#e2e6df"}] },
+    { featureType:"water", elementType:"geometry", stylers:[{color:"#c9dde7"}] },
     { featureType:"water", elementType:"labels.text.fill", stylers:[{color:"#6f93a6"}] },
   ],
   dark: [
-    { elementType:"geometry", stylers:[{color:"#151d19"}] },
     { elementType:"labels.icon", stylers:[{visibility:"off"}] },
     { elementType:"labels.text.fill", stylers:[{color:"#6f7d75"}] },
-    { elementType:"labels.text.stroke", stylers:[{color:"#151d19"}] },
+    { elementType:"labels.text.stroke", stylers:[{color:"#141c18"}] },
+    { featureType:"landscape", elementType:"geometry", stylers:[{color:"#141c18"}] },
+    { featureType:"landscape.man_made", elementType:"geometry.fill", stylers:[{color:"#1b2420"}] },
+    { featureType:"landscape.man_made", elementType:"geometry.stroke", stylers:[{color:"#27332d"}] },
+    { featureType:"landscape.natural.landcover", elementType:"geometry", stylers:[{color:"#1e3022"}] },
     { featureType:"poi", stylers:[{visibility:"off"}] },
     { featureType:"poi.park", stylers:[{visibility:"on"}] },
-    { featureType:"poi.park", elementType:"geometry", stylers:[{color:"#1c2a1f"}] },
-    { featureType:"poi.park", elementType:"labels", stylers:[{visibility:"off"}] },
+    { featureType:"poi.park", elementType:"geometry", stylers:[{color:"#1e3022"}] },
+    { featureType:"poi.park", elementType:"labels.text.fill", stylers:[{color:"#7fa06c"}] },
     { featureType:"transit", stylers:[{visibility:"off"}] },
     { featureType:"administrative", elementType:"labels", stylers:[{visibility:"off"}] },
-    { featureType:"landscape.man_made", elementType:"geometry.fill", stylers:[{color:"#1b2420"}] },
-    { featureType:"landscape.man_made", elementType:"geometry.stroke", stylers:[{color:"#26322c"}] },
-    { featureType:"road", elementType:"geometry", stylers:[{color:"#26302b"}] },
+    { featureType:"road", elementType:"geometry.fill", stylers:[{color:"#2b3631"}] },
+    { featureType:"road", elementType:"geometry.stroke", stylers:[{color:"#36433c"}] },
     { featureType:"road", elementType:"labels", stylers:[{visibility:"off"}] },
-    { featureType:"road.highway", elementType:"geometry", stylers:[{color:"#202925"}] },
+    { featureType:"road.highway", elementType:"geometry.fill", stylers:[{color:"#222b27"}] },
     { featureType:"water", elementType:"geometry", stylers:[{color:"#16303b"}] },
     { featureType:"water", elementType:"labels.text.fill", stylers:[{color:"#5a8296"}] },
   ],
@@ -546,7 +550,10 @@ async function initMap(){
     styles: darkMQ.matches ? MAP_STYLE.dark : MAP_STYLE.light,
     backgroundColor: darkMQ.matches ? "#151d19" : "#f1f3ef",
     disableDefaultUI:true, zoomControl:true, clickableIcons:false, gestureHandling:"greedy",
+    zoomControlOptions:{ position: google.maps.ControlPosition.RIGHT_TOP },
   });
+  // 現在地ボタンはズームボタンの下に、地図のコントロールとして配置（重なり防止）
+  map.controls[google.maps.ControlPosition.RIGHT_TOP].push($("#locate"));
 
   // 順路（作品同士を直線でつないだ目安）
   const route = new Polyline({ map, path: works.map(w=>({lat:w.lat,lng:w.lng})), strokeOpacity:0,
