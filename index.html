@@ -109,14 +109,26 @@ button{font:inherit;color:inherit}
 .prevlink{margin-top:.6rem;background:none;border:0;padding:.2rem 0;color:var(--muted);font-size:.8rem;cursor:pointer;text-decoration:underline}
 
 /* ---- map markers ---- */
-.pin{
-  display:grid;place-items:center;width:30px;height:30px;border-radius:50%;
-  background:#1f2b26;color:#fff;font:700 14px/1 "Zen Kaku Gothic New",sans-serif;
-  border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);cursor:pointer;
-  transition:transform .15s ease;
+.pin{position:absolute;width:0;height:0;cursor:pointer}
+.pin b{
+  position:absolute;left:-15px;top:-15px;width:30px;height:30px;border-radius:50%;
+  display:grid;place-items:center;background:#1f2b26;color:#fff;
+  font:700 14px/1 "Zen Kaku Gothic New","Hiragino Sans",sans-serif;
+  border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35);transition:transform .15s ease;
 }
-.pin.active{background:#2c6e8f;transform:scale(1.35)}
-.me{width:16px;height:16px;border-radius:50%;background:#2f7de1;border:3px solid #fff;box-shadow:0 0 0 6px rgba(47,125,225,.2)}
+.pin .lbl{
+  position:absolute;left:22px;top:-14px;white-space:nowrap;display:none;
+  background:#fff;color:#1f2b26;border-radius:6px;padding:3px 8px;
+  font:700 12px/1.4 "Zen Kaku Gothic New","Hiragino Sans",sans-serif;box-shadow:0 1px 5px rgba(0,0,0,.25);
+}
+.pin.active b{background:#2c6e8f;transform:scale(1.3)}
+.pin.active .lbl{display:block;left:26px}
+@media (prefers-color-scheme: dark){
+  .pin b{background:#e4ebe6;color:#111916;border-color:#111916}
+  .pin.active b{background:#74b6d6;color:#0d1a20}
+  .pin .lbl{background:#18221e;color:#e4ebe6}
+}
+.me{position:absolute;left:-8px;top:-8px;width:16px;height:16px;border-radius:50%;background:#2f7de1;border:3px solid #fff;box-shadow:0 0 0 6px rgba(47,125,225,.2)}
 #locate{
   position:fixed;right:1rem;z-index:1;bottom:calc(46vh + 1rem);
   border:1px solid var(--line);background:var(--surface);border-radius:999px;
@@ -147,8 +159,7 @@ button{font:inherit;color:inherit}
 const CONFIG = {
   // Google Maps JavaScript API のキー。未設定でもキャプション一覧としては動きます。
   GOOGLE_MAPS_API_KEY: "AIzaSyCWQujgwVRKV1cuKlc9-otNPkpm1p0nqdw",
-  // Cloud Console で作った Map ID（地図スタイル用）。無ければ "DEMO_MAP_ID" のままで可。
-  MAP_ID: "DEMO_MAP_ID",
+  // 地図の見た目はこのファイル内の MAP_STYLE で調整しています（Map ID は不要）。
   // スプレッドシート「作品データ」タブのCSV URL（ファイル > 共有 > ウェブに公開 > CSV）。
   // 空のとき、または読み込みに失敗したときは下の埋め込みデータを使います。
   SHEET_CSV_URL: "",
@@ -164,55 +175,55 @@ const EMBEDDED_WORKS = [
   "id": "01",
   "order": "1",
   "published": "FALSE",
-  "lat": "35.688722",
-  "lng": "139.765611",
-  "artist_ja": "後藤拓真",
-  "artist_en": "Takuma Goto",
-  "title_ja": "スピグラ",
-  "title_en": "SPIN GRAPHIC",
+  "lat": "35.688611",
+  "lng": "139.766306",
+  "artist_ja": "さかたまき",
+  "artist_en": "Maki Sakata",
+  "title_ja": "こくこく、ゆらゆら",
+  "title_en": "Kokukoku, Yurayura — Moment by Moment, Rippling",
   "year": "",
   "material_ja": "",
   "material_en": "",
   "size": "",
-  "touch": "触れてOK",
-  "caption_ja": "クルクル回すことで、立体に描かれた柄がコロコロと入れ替わり、さまざまなグラフィックを楽しめる。自由に触れて遊びながら、自分の手で柄を変化させる楽しさを持った、大人も遊べる遊具的な作品。",
-  "caption_en": "spinning the object, patterns shift to create different graphics. A playful object that invites people to touch, spin, and change the patterns, offering an interactive experience for adults and children."
+  "touch": "接触禁止",
+  "caption_ja": "公園の水たまりのように、空や光、通りかかる人を写し込む器を作りました。散歩道の途中の余白のようなものです。\n整えられ、変化がならされ見えにくい道で、ゆるやかな移ろいを拾うような。\n立ち止まってぼーっとしたり、映るものを面白がったりしながら、この道で過ごす流れる時間を感じられたらと思います。",
+  "caption_en": "Like a puddle in a park, I placed a vessel that holds the sky, the light, and the people passing by. It is something like a margin along the walking path.\nOn a path that is carefully tended, where change is smoothed out and hard to see, it gathers the gentle shifts that pass through.\nI hope that, as you pause to daydream or take delight in what is reflected, you can feel the time you spend on this path flowing by."
  },
  {
   "id": "02",
   "order": "2",
   "published": "FALSE",
-  "lat": "35.688694",
-  "lng": "139.765667",
-  "artist_ja": "後藤宙",
-  "artist_en": "Kanata Goto",
-  "title_ja": "隆起と構造",
-  "title_en": "Uplift and Structure",
+  "lat": "35.688611",
+  "lng": "139.766194",
+  "artist_ja": "清水領真",
+  "artist_en": "Ryoma Shimizu",
+  "title_ja": "Metron",
+  "title_en": "Metron",
   "year": "",
   "material_ja": "",
   "material_en": "",
   "size": "",
   "touch": "接触禁止",
-  "caption_ja": "作品の表面に生じる隆起は、それを支える構造によって形づくられている。静止したその形は、内側から押し上げられている途中なのか。それとも隆起を終えた後なのか。数百万年をかけて隆起したアルプスのように、動かないものに私たちはどこまで過去の運動を想像できるだろうか。",
-  "caption_en": "The work’s surface is shaped by a structure beneath it. Is it still rising from within, or has the uplift already ended? Like the Alps, formed over millions of years, can we imagine past movement in something that appears still?"
+  "caption_ja": "大手町の緑道から見える巨大な都市構造は、精密で有機的に絡み合いながら、人の気配を静かに包み込んでいる。そこでは時間が絶えず流れる一方、どこか止まっているようにも感じられる。「Metron」は、そんな都市に流れる曖昧な時間のリズムを、カチカチと刻む音とわずかな揺れによって可視化する。人の呼吸、都市の心拍。その境界にある静寂を動かす。",
+  "caption_en": "From the greenway in Otemachi, the city appears as a vast and precise structure, quietly enclosing traces of human life. Time seems to flow endlessly, yet somehow remains still. “Metron” visualizes this ambiguous rhythm through subtle movement and the ticking of a clock—like a human breath, or the heartbeat of a city. It sets the silence into motion."
  },
  {
   "id": "03",
   "order": "3",
   "published": "FALSE",
-  "lat": "35.688694",
-  "lng": "139.765722",
-  "artist_ja": "millet",
-  "artist_en": "millet",
-  "title_ja": "切り取られた人",
-  "title_en": "A Cropped Person",
+  "lat": "35.688639",
+  "lng": "139.766083",
+  "artist_ja": "清藤光",
+  "artist_en": "Hikaru Seitoh",
+  "title_ja": "Nature, Human, All in One Box",
+  "title_en": "Nature, Human, All in One Box",
   "year": "",
   "material_ja": "",
   "material_en": "",
   "size": "",
   "touch": "接触禁止",
-  "caption_ja": "高さの認知は地によって消えます\nビルの階層でも地下鉄の中でも高さの感覚って感じないそれって変だけど変じゃないか、今どこかにいる人を切り取ってきました。\n高さを認知したかな？/",
-  "caption_en": "The perception of height disappears with the ground.\n\nBetween floors, underground,\nheight becomes difficult to perceive.\n\nStrange, but not entirely strange.\n\nI have cut out a person from somewhere,\nfrom where they are now.\n\nWas the height perceived?"
+  "caption_ja": "指紋をよく見ると熱帯魚の模様に、葉脈を辿ると動物の血管にも見えてくる。人、植物、動物は異なる姿を持ちながら、共通する構造や法則のもとに成り立っている。風もまた、目には見えない自然のエネルギーの現れである。この箱はその風を受け、弦の振動を通して音へと変換する。異なる形や現象は、姿を変えながらつながっている。",
+  "caption_en": "Look closely at a fingerprint, and it may resemble the patterns of a tropical fish; trace the veins of a leaf, and they may evoke an animal’s blood vessels. Humans, plants, and animals take different forms, yet share underlying structures and principles. Wind, too, is an invisible expression of natural energy. This box receives the wind and transforms it into sound through the vibration of strings. Different forms and phenomena remain connected as they shift from one state to another."
  },
  {
   "id": "04",
@@ -236,55 +247,55 @@ const EMBEDDED_WORKS = [
   "id": "05",
   "order": "5",
   "published": "FALSE",
-  "lat": "35.688639",
-  "lng": "139.766083",
-  "artist_ja": "清藤光",
-  "artist_en": "Hikaru Seitoh",
-  "title_ja": "Nature, Human, All in One Box",
-  "title_en": "Nature, Human, All in One Box",
+  "lat": "35.688694",
+  "lng": "139.765722",
+  "artist_ja": "millet",
+  "artist_en": "millet",
+  "title_ja": "切り取られた人",
+  "title_en": "A Cropped Person",
   "year": "",
   "material_ja": "",
   "material_en": "",
   "size": "",
   "touch": "接触禁止",
-  "caption_ja": "指紋をよく見ると熱帯魚の模様に、葉脈を辿ると動物の血管にも見えてくる。人、植物、動物は異なる姿を持ちながら、共通する構造や法則のもとに成り立っている。風もまた、目には見えない自然のエネルギーの現れである。この箱はその風を受け、弦の振動を通して音へと変換する。異なる形や現象は、姿を変えながらつながっている。",
-  "caption_en": "Look closely at a fingerprint, and it may resemble the patterns of a tropical fish; trace the veins of a leaf, and they may evoke an animal’s blood vessels. Humans, plants, and animals take different forms, yet share underlying structures and principles. Wind, too, is an invisible expression of natural energy. This box receives the wind and transforms it into sound through the vibration of strings. Different forms and phenomena remain connected as they shift from one state to another."
+  "caption_ja": "高さの認知は地によって消えます\nビルの階層でも地下鉄の中でも高さの感覚って感じないそれって変だけど変じゃないか、今どこかにいる人を切り取ってきました。\n高さを認知したかな？/",
+  "caption_en": "The perception of height disappears with the ground.\n\nBetween floors, underground,\nheight becomes difficult to perceive.\n\nStrange, but not entirely strange.\n\nI have cut out a person from somewhere,\nfrom where they are now.\n\nWas the height perceived?"
  },
  {
   "id": "06",
   "order": "6",
   "published": "FALSE",
-  "lat": "35.688611",
-  "lng": "139.766194",
-  "artist_ja": "清水領真",
-  "artist_en": "Ryoma Shimizu",
-  "title_ja": "Metron",
-  "title_en": "Metron",
+  "lat": "35.688694",
+  "lng": "139.765667",
+  "artist_ja": "後藤宙",
+  "artist_en": "Kanata Goto",
+  "title_ja": "隆起と構造",
+  "title_en": "Uplift and Structure",
   "year": "",
   "material_ja": "",
   "material_en": "",
   "size": "",
   "touch": "接触禁止",
-  "caption_ja": "大手町の緑道から見える巨大な都市構造は、精密で有機的に絡み合いながら、人の気配を静かに包み込んでいる。そこでは時間が絶えず流れる一方、どこか止まっているようにも感じられる。「Metron」は、そんな都市に流れる曖昧な時間のリズムを、カチカチと刻む音とわずかな揺れによって可視化する。人の呼吸、都市の心拍。その境界にある静寂を動かす。",
-  "caption_en": "From the greenway in Otemachi, the city appears as a vast and precise structure, quietly enclosing traces of human life. Time seems to flow endlessly, yet somehow remains still. “Metron” visualizes this ambiguous rhythm through subtle movement and the ticking of a clock—like a human breath, or the heartbeat of a city. It sets the silence into motion."
+  "caption_ja": "作品の表面に生じる隆起は、それを支える構造によって形づくられている。静止したその形は、内側から押し上げられている途中なのか。それとも隆起を終えた後なのか。数百万年をかけて隆起したアルプスのように、動かないものに私たちはどこまで過去の運動を想像できるだろうか。",
+  "caption_en": "The work’s surface is shaped by a structure beneath it. Is it still rising from within, or has the uplift already ended? Like the Alps, formed over millions of years, can we imagine past movement in something that appears still?"
  },
  {
   "id": "07",
   "order": "7",
   "published": "FALSE",
-  "lat": "35.688611",
-  "lng": "139.766306",
-  "artist_ja": "さかたまき",
-  "artist_en": "Maki Sakata",
-  "title_ja": "こくこく、ゆらゆら",
-  "title_en": "Kokukoku, Yurayura — Moment by Moment, Rippling",
+  "lat": "35.688722",
+  "lng": "139.765611",
+  "artist_ja": "後藤拓真",
+  "artist_en": "Takuma Goto",
+  "title_ja": "スピグラ",
+  "title_en": "SPIN GRAPHIC",
   "year": "",
   "material_ja": "",
   "material_en": "",
   "size": "",
-  "touch": "接触禁止",
-  "caption_ja": "公園の水たまりのように、空や光、通りかかる人を写し込む器を作りました。散歩道の途中の余白のようなものです。\n整えられ、変化がならされ見えにくい道で、ゆるやかな移ろいを拾うような。\n立ち止まってぼーっとしたり、映るものを面白がったりしながら、この道で過ごす流れる時間を感じられたらと思います。",
-  "caption_en": "Like a puddle in a park, I placed a vessel that holds the sky, the light, and the people passing by. It is something like a margin along the walking path.\nOn a path that is carefully tended, where change is smoothed out and hard to see, it gathers the gentle shifts that pass through.\nI hope that, as you pause to daydream or take delight in what is reflected, you can feel the time you spend on this path flowing by."
+  "touch": "触れてOK",
+  "caption_ja": "クルクル回すことで、立体に描かれた柄がコロコロと入れ替わり、さまざまなグラフィックを楽しめる。自由に触れて遊びながら、自分の手で柄を変化させる楽しさを持った、大人も遊べる遊具的な作品。",
+  "caption_en": "spinning the object, patterns shift to create different graphics. A playful object that invites people to touch, spin, and change the patterns, offering an interactive experience for adults and children."
  },
  {
   "id": "08",
@@ -342,7 +353,7 @@ const T = {
 
 /* ================= 状態 ================= */
 let works = [], lang = "ja", current = -1;
-let map = null, markers = [], meMarker = null, AdvancedMarker = null;
+let map = null, markers = [], meMarker = null, HtmlMarker = null;
 const $ = (s) => document.querySelector(s);
 const panel = $("#panel");
 
@@ -448,7 +459,7 @@ function select(i, {pan=true, push=true}={}){
     const chip = $(`.chip[data-i="${i}"]`); chip && chip.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"});
     if(push) history.replaceState(null,"",`#${works[i].id}`);
   }
-  markers.forEach((m,k)=>{ m.content.classList.toggle("active", k===i); m.zIndex = k===i ? 10 : 1; });
+  markers.forEach((m,k)=>{ m.el.classList.toggle("active", k===i); m.setZ(k===i ? 10 : 1); });
   if(map && pan && i>=0) panTo(works[i]);
 }
 function panTo(w){
@@ -462,28 +473,99 @@ function loadMapsAPI(key){
   // Google 公式の動的ローダー
   (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({key, v:"weekly", language:lang, region:"JP"});
 }
+/* シンプルな地図スタイル：店舗・駅・道路標識などを消し、川・緑道・建物の形だけを残す */
+const MAP_STYLE = {
+  light: [
+    { elementType:"geometry", stylers:[{color:"#f1f3ef"}] },
+    { elementType:"labels.icon", stylers:[{visibility:"off"}] },
+    { elementType:"labels.text.fill", stylers:[{color:"#8a948e"}] },
+    { elementType:"labels.text.stroke", stylers:[{color:"#f1f3ef"}] },
+    { featureType:"poi", stylers:[{visibility:"off"}] },
+    { featureType:"poi.park", stylers:[{visibility:"on"}] },
+    { featureType:"poi.park", elementType:"geometry", stylers:[{color:"#dde8d5"}] },
+    { featureType:"poi.park", elementType:"labels", stylers:[{visibility:"off"}] },
+    { featureType:"transit", stylers:[{visibility:"off"}] },
+    { featureType:"administrative", elementType:"labels", stylers:[{visibility:"off"}] },
+    { featureType:"landscape.man_made", elementType:"geometry.fill", stylers:[{color:"#e6e9e3"}] },
+    { featureType:"landscape.man_made", elementType:"geometry.stroke", stylers:[{color:"#d6dbd3"}] },
+    { featureType:"road", elementType:"geometry", stylers:[{color:"#ffffff"}] },
+    { featureType:"road", elementType:"labels", stylers:[{visibility:"off"}] },
+    { featureType:"road.highway", elementType:"geometry", stylers:[{color:"#e3e6e1"}] },
+    { featureType:"water", elementType:"geometry", stylers:[{color:"#cfe0e8"}] },
+    { featureType:"water", elementType:"labels.text.fill", stylers:[{color:"#6f93a6"}] },
+  ],
+  dark: [
+    { elementType:"geometry", stylers:[{color:"#151d19"}] },
+    { elementType:"labels.icon", stylers:[{visibility:"off"}] },
+    { elementType:"labels.text.fill", stylers:[{color:"#6f7d75"}] },
+    { elementType:"labels.text.stroke", stylers:[{color:"#151d19"}] },
+    { featureType:"poi", stylers:[{visibility:"off"}] },
+    { featureType:"poi.park", stylers:[{visibility:"on"}] },
+    { featureType:"poi.park", elementType:"geometry", stylers:[{color:"#1c2a1f"}] },
+    { featureType:"poi.park", elementType:"labels", stylers:[{visibility:"off"}] },
+    { featureType:"transit", stylers:[{visibility:"off"}] },
+    { featureType:"administrative", elementType:"labels", stylers:[{visibility:"off"}] },
+    { featureType:"landscape.man_made", elementType:"geometry.fill", stylers:[{color:"#1b2420"}] },
+    { featureType:"landscape.man_made", elementType:"geometry.stroke", stylers:[{color:"#26322c"}] },
+    { featureType:"road", elementType:"geometry", stylers:[{color:"#26302b"}] },
+    { featureType:"road", elementType:"labels", stylers:[{visibility:"off"}] },
+    { featureType:"road.highway", elementType:"geometry", stylers:[{color:"#202925"}] },
+    { featureType:"water", elementType:"geometry", stylers:[{color:"#16303b"}] },
+    { featureType:"water", elementType:"labels.text.fill", stylers:[{color:"#5a8296"}] },
+  ],
+};
+const darkMQ = window.matchMedia("(prefers-color-scheme: dark)");
+const routeColor = () => darkMQ.matches ? "#74b6d6" : "#2c6e8f";
+
+/* HTMLで描くピン（番号＋選択中は作品名ラベル） */
+function defineHtmlMarker(){
+  HtmlMarker = class extends google.maps.OverlayView {
+    constructor(pos, el, z=1){ super(); this.pos=pos; this.el=el; this.z=z; }
+    onAdd(){ this.getPanes().overlayMouseTarget.appendChild(this.el); google.maps.OverlayView.preventMapHitsAndGesturesFrom(this.el); }
+    draw(){
+      const p=this.getProjection()?.fromLatLngToDivPixel(new google.maps.LatLng(this.pos)); if(!p) return;
+      this.el.style.left=p.x+"px"; this.el.style.top=p.y+"px"; this.el.style.zIndex=this.z;
+    }
+    onRemove(){ this.el.remove(); }
+    setPosition(pos){ this.pos=pos; this.draw(); }
+    setZ(z){ this.z=z; this.el.style.zIndex=z; }
+  };
+}
+function updateLabels(){
+  markers.forEach((m,k)=>{ m.el.querySelector(".lbl").textContent = pick(works[k],"title"); });
+}
+
 async function initMap(){
   const key = CONFIG.GOOGLE_MAPS_API_KEY;
   if(!key || key==="YOUR_API_KEY"){ const n=$("#nokey"); n.innerHTML=`<p style="max-width:28em;margin:0">${T[lang].nokey}</p>`; n.hidden=false; return; }
   loadMapsAPI(key);
   const { Map, Polyline } = await google.maps.importLibrary("maps");
-  ({ AdvancedMarkerElement: AdvancedMarker } = await google.maps.importLibrary("marker"));
-  const core = await google.maps.importLibrary("core");
-  const opts = { mapId:CONFIG.MAP_ID, center:{lat:works[0].lat,lng:works[0].lng}, zoom:18,
-                 disableDefaultUI:true, zoomControl:true, clickableIcons:false, gestureHandling:"greedy" };
-  if(core.ColorScheme) opts.colorScheme = core.ColorScheme.FOLLOW_SYSTEM;
-  map = new Map($("#map"), opts);
+  defineHtmlMarker();
+  map = new Map($("#map"), {
+    center:{lat:works[0].lat,lng:works[0].lng}, zoom:18,
+    styles: darkMQ.matches ? MAP_STYLE.dark : MAP_STYLE.light,
+    backgroundColor: darkMQ.matches ? "#151d19" : "#f1f3ef",
+    disableDefaultUI:true, zoomControl:true, clickableIcons:false, gestureHandling:"greedy",
+  });
 
-  // 順路（作品同士を直線でつないだ目安。実際の歩行ルートではありません）
-  new Polyline({ map, path: works.map(w=>({lat:w.lat,lng:w.lng})), strokeOpacity:0,
-    icons:[{ icon:{ path:"M 0,-1 0,1", strokeOpacity:.9, strokeColor:"#2c6e8f", scale:3 }, offset:"0", repeat:"12px" }] });
+  // 順路（作品同士を直線でつないだ目安）
+  const route = new Polyline({ map, path: works.map(w=>({lat:w.lat,lng:w.lng})), strokeOpacity:0,
+    icons:[{ icon:{ path:"M 0,-1 0,1", strokeOpacity:1, strokeColor:routeColor(), scale:3.5 }, offset:"0", repeat:"13px" }] });
+  darkMQ.addEventListener("change", ()=>{
+    map.setOptions({ styles: darkMQ.matches ? MAP_STYLE.dark : MAP_STYLE.light });
+    route.setOptions({ icons:[{ icon:{ path:"M 0,-1 0,1", strokeOpacity:1, strokeColor:routeColor(), scale:3.5 }, offset:"0", repeat:"13px" }] });
+  });
 
   markers = works.map((w,i)=>{
-    const el = document.createElement("div"); el.className="pin"; el.textContent=w.order;
-    const m = new AdvancedMarker({ map, position:{lat:w.lat,lng:w.lng}, content:el, title:`${w.order}. ${w.title_ja}`, gmpClickable:true });
-    m.addEventListener("gmp-click", ()=>select(i));
+    const el = document.createElement("div"); el.className="pin";
+    el.setAttribute("role","button"); el.setAttribute("aria-label",`${w.order}. ${w.title_ja}`);
+    el.innerHTML = `<b>${w.order}</b><span class="lbl"></span>`;
+    el.addEventListener("click", ()=>select(i));
+    const m = new HtmlMarker({lat:w.lat,lng:w.lng}, el);
+    m.setMap(map);
     return m;
   });
+  updateLabels();
 
   const b = new google.maps.LatLngBounds(); works.forEach(w=>b.extend({lat:w.lat,lng:w.lng}));
   const wide = window.innerWidth >= 900;
@@ -503,8 +585,8 @@ function locate(){
   btn.textContent=T[lang].locating;
   navigator.geolocation.getCurrentPosition(p=>{
     const pos={lat:p.coords.latitude,lng:p.coords.longitude};
-    if(!meMarker){ const el=document.createElement("div"); el.className="me"; meMarker=new AdvancedMarker({map,position:pos,content:el,zIndex:5}); }
-    else meMarker.position=pos;
+    if(!meMarker){ const el=document.createElement("div"); el.className="me"; meMarker=new HtmlMarker(pos,el,5); meMarker.setMap(map); }
+    else meMarker.setPosition(pos);
     map.panTo(pos); btn.textContent=T[lang].locate;
   },()=>{ btn.textContent=T[lang].locFail; setTimeout(()=>btn.textContent=T[lang].locate,2500); },{enableHighAccuracy:true,timeout:10000});
 }
@@ -531,6 +613,7 @@ $("#lang").addEventListener("click",()=>{
   lang = lang==="ja" ? "en" : "ja";
   try{ localStorage.setItem("nora-lang",lang); }catch{}
   select(current,{pan:false,push:false});
+  if(markers.length) updateLabels();
 });
 $("#locate").addEventListener("click",locate);
 document.addEventListener("keydown",(e)=>{
