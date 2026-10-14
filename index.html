@@ -503,6 +503,8 @@ const HIDE = [
   { featureType:"transit", stylers:[{visibility:"off"}] },
   { featureType:"road", elementType:"labels", stylers:[{visibility:"off"}] },
   { featureType:"administrative", elementType:"labels", stylers:[{visibility:"off"}] },
+  // 建物の立体表示をやめ、平面の形だけにする
+  { featureType:"landscape.man_made", elementType:"geometry", stylers:[{visibility:"simplified"}] },
 ];
 const MAP_STYLE = {
   light: [ { stylers:[{saturation:-70}] }, ...HIDE ],
@@ -557,6 +559,8 @@ async function initMap(){
     center:{lat:works[0].lat,lng:works[0].lng}, zoom:18,
     styles: darkMQ.matches ? MAP_STYLE.dark : MAP_STYLE.light,
     backgroundColor: darkMQ.matches ? "#151d19" : "#f1f3ef",
+    renderingType: google.maps.RenderingType ? google.maps.RenderingType.RASTER : undefined,
+    tilt:0, heading:0, rotateControl:false,
     disableDefaultUI:true, zoomControl: window.innerWidth >= 900, clickableIcons:false, gestureHandling:"greedy",
     zoomControlOptions:{ position: google.maps.ControlPosition.RIGHT_TOP },
   });
