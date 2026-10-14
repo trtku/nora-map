@@ -15,7 +15,9 @@
   --shadow:0 -6px 24px rgba(20,35,28,.12);
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
+  font-size:15px;
 }
+@media (max-width:899px){ :root{font-size:14px} }
 @media (prefers-color-scheme: dark){
   :root{
     color-scheme: dark;
@@ -44,68 +46,70 @@ button{font:inherit;color:inherit}
 /* ---- panel: bottom sheet on phones, side panel on wide screens ---- */
 #panel{
   position:fixed;left:0;right:0;bottom:0;z-index:2;
-  max-height:46vh;display:flex;flex-direction:column;
+  height:50%;display:flex;flex-direction:column;
   background:var(--surface);border-top:1px solid var(--line);
-  border-radius:18px 18px 0 0;box-shadow:var(--shadow);
   padding-bottom:env(safe-area-inset-bottom,0px);
-  transition:max-height .28s ease;
 }
-#panel.open{max-height:72vh}
+@media (max-width:899px){
+  #mapwrap{bottom:50%}
+  #nokey{bottom:50%;padding:1.5rem}
+}
 @media (min-width:900px){
-  #panel,#panel.open{
-    top:0;right:auto;width:420px;max-height:none;border-radius:0;
-    border-top:0;border-right:1px solid var(--line);box-shadow:none;
+  #panel{
+    top:0;right:auto;width:400px;height:auto;
+    border-top:0;border-right:1px solid var(--line);
     padding-top:env(safe-area-inset-top,0px);
   }
-  #mapwrap{left:420px}
-  #nokey{left:420px;padding-bottom:2rem}
+  #mapwrap{left:400px}
+  #nokey{left:400px;padding-bottom:2rem}
 }
-.bar{display:flex;align-items:flex-start;gap:1rem;padding:1rem 1.25rem .5rem}
-.bar h1{font-size:1.15rem;font-weight:700;margin:0;letter-spacing:.02em;line-height:1.35}
-.bar p{margin:.1rem 0 0;font-size:.8rem;color:var(--muted)}
+.bar{display:flex;align-items:center;gap:1rem;padding:.9rem 1.1rem .4rem}
+.bar h1{font-size:1.05rem;font-weight:700;margin:0;letter-spacing:.02em;line-height:1.35}
+.bar p{margin:0;font-size:.75rem;color:var(--muted)}
 .lang{
   margin-left:auto;flex:none;border:1px solid var(--line);background:transparent;
   border-radius:999px;padding:.25rem .8rem;font-size:.8rem;cursor:pointer;
 }
 
-#rail{display:flex;gap:.5rem;overflow-x:auto;padding:.5rem 1.25rem .9rem;scrollbar-width:none}
+#rail{display:flex;gap:.4rem;overflow-x:auto;padding:.4rem 1.1rem .7rem;scrollbar-width:none}
 #rail::-webkit-scrollbar{display:none}
 .chip{
-  flex:none;width:2.6rem;height:2.6rem;border-radius:50%;
+  flex:none;width:2.2rem;height:2.2rem;border-radius:50%;
   border:1.5px solid var(--ink);background:var(--surface);
-  font-weight:700;font-size:1rem;cursor:pointer;display:grid;place-items:center;
+  font-weight:700;font-size:.9rem;cursor:pointer;display:grid;place-items:center;
 }
 .chip[aria-current="true"]{background:var(--river);border-color:var(--river);color:var(--river-ink)}
 
-.scroll{overflow-y:auto;padding:0 1.25rem 1.25rem;flex:1;min-height:0}
-.intro p{margin:.2rem 0 .9rem;font-size:.9rem;color:var(--muted)}
+.scroll{overflow-y:auto;padding:0 1.1rem 1.2rem;flex:1;min-height:0}
+.intro p{margin:.1rem 0 .8rem;font-size:.85rem;color:var(--muted)}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
-  border-radius:10px;padding:.6rem 1rem;font-size:.9rem;font-weight:500;
+  border-radius:10px;padding:.5rem .9rem;font-size:.85rem;font-weight:500;
   text-decoration:none;cursor:pointer;border:1.5px solid var(--ink);background:transparent;color:var(--ink);
 }
 .btn.primary{background:var(--river);border-color:var(--river);color:var(--river-ink)}
 
 /* ---- work card ---- */
 .card{padding-top:.4rem}
-.card .num{font-size:3.2rem;font-weight:700;line-height:1;color:var(--river);font-variant-numeric:tabular-nums}
-.card h2{font-size:1.35rem;margin:.6rem 0 0;line-height:1.4;font-weight:700}
-.card .sub{margin:.1rem 0 0;color:var(--muted);font-size:.85rem}
-.card .artist{margin:.6rem 0 0;font-size:1rem;font-weight:500}
+.card .head{display:flex;align-items:baseline;gap:.6rem}
+.card .num{font-size:1.6rem;font-weight:700;line-height:1;color:var(--river);font-variant-numeric:tabular-nums;flex:none}
+.card h2{font-size:1.15rem;margin:0;line-height:1.4;font-weight:700}
+.card .sub{margin:.15rem 0 0;color:var(--muted);font-size:.78rem}
+.card .artist{margin:.4rem 0 0;font-size:.9rem;font-weight:500}
 .card .meta{margin:.2rem 0 0;font-size:.8rem;color:var(--muted)}
-.touch{display:inline-block;margin-top:.8rem;font-size:.8rem;font-weight:700;padding:.15rem .6rem;border-radius:6px;border:1.5px solid currentColor}
+.touch{display:inline-block;margin-top:.6rem;font-size:.72rem;font-weight:700;padding:.15rem .6rem;border-radius:6px;border:1.5px solid currentColor}
 .touch.no{color:var(--warn)}
 .touch.ok{color:var(--moss)}
-.caption{margin:1rem 0 0;white-space:pre-line;font-size:.95rem;max-width:36em}
+.caption{margin:.8rem 0 0;white-space:pre-line;font-size:.88rem;line-height:1.8;max-width:36em}
 .caption:lang(en){line-height:1.6}
-.actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.2rem}
+.actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
 .next{
-  display:flex;align-items:center;gap:.9rem;width:100%;margin-top:1.4rem;padding:.8rem 1rem;
+  display:flex;align-items:center;gap:.8rem;width:100%;margin-top:1.1rem;padding:.65rem .9rem;
   border:1.5px solid var(--line);border-radius:12px;background:transparent;text-align:left;cursor:pointer;
 }
-.next .n{font-weight:700;font-size:1.4rem;color:var(--river);min-width:1.6rem}
-.next small{display:block;color:var(--muted);font-size:.75rem}
-.next strong{display:block;font-weight:500}
+.next .n{font-weight:700;font-size:1.2rem;color:var(--river);min-width:1.6rem}
+.next small{display:block;color:var(--muted);font-size:.7rem}
+.next strong{display:block;font-weight:500;font-size:.9rem}
 .prevlink{margin-top:.6rem;background:none;border:0;padding:.2rem 0;color:var(--muted);font-size:.8rem;cursor:pointer;text-decoration:underline}
 
 /* ---- map markers ---- */
@@ -451,8 +455,7 @@ function renderCard(i){
   const touch = w.touch ? (w.touch.includes("OK") ? `<span class="touch ok">${t.ok}</span>` : `<span class="touch no">${t.no}</span>`) : "";
   const cap = pick(w,"caption");
   $("#body").innerHTML = `<article class="card">
-      <div class="num" aria-hidden="true">${w.order}</div>
-      <h2>${esc(titleMain)}</h2>
+      <div class="head"><span class="num" aria-hidden="true">${w.order}</span><h2>${esc(titleMain)}</h2></div>
       ${titleOther && titleOther!==titleMain ? `<p class="sub">${esc(titleOther)}</p>`:""}
       <p class="artist">${esc(pick(w,"artist"))}</p>
       ${meta?`<p class="meta">${esc(meta)}</p>`:""}
@@ -485,7 +488,6 @@ function select(i, {pan=true, push=true}={}){
 function panTo(w){
   map.panTo({lat:w.lat,lng:w.lng});
   if(map.getZoom() < 19) map.setZoom(19);
-  if(window.innerWidth < 900) map.panBy(0, Math.round(window.innerHeight*0.25));
 }
 
 /* ================= 地図 ================= */
@@ -539,7 +541,7 @@ async function initMap(){
     center:{lat:works[0].lat,lng:works[0].lng}, zoom:18,
     styles: darkMQ.matches ? MAP_STYLE.dark : MAP_STYLE.light,
     backgroundColor: darkMQ.matches ? "#151d19" : "#f1f3ef",
-    disableDefaultUI:true, zoomControl:true, clickableIcons:false, gestureHandling:"greedy",
+    disableDefaultUI:true, zoomControl: window.innerWidth >= 900, clickableIcons:false, gestureHandling:"greedy",
     zoomControlOptions:{ position: google.maps.ControlPosition.RIGHT_TOP },
   });
   // 現在地ボタンはズームボタンの下に、地図のコントロールとして配置（重なり防止）
@@ -571,7 +573,7 @@ async function initMap(){
 
   const b = new google.maps.LatLngBounds(); works.forEach(w=>b.extend({lat:w.lat,lng:w.lng}));
   const wide = window.innerWidth >= 900;
-  map.fitBounds(b, wide ? 60 : {top:60,left:30,right:30,bottom:Math.round(window.innerHeight*0.48)});
+  map.fitBounds(b, wide ? 60 : 36);
   if(current>=0) select(current,{push:false});
   $("#locate").hidden = false;
   let loaded=false;
