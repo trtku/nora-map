@@ -506,7 +506,23 @@ const HIDE = [
 ];
 const MAP_STYLE = {
   light: [ { stylers:[{saturation:-70}] }, ...HIDE ],
-  dark:  [ { stylers:[{invert_lightness:true},{saturation:-80},{lightness:-15}] }, ...HIDE ],
+  // ダークモード用：真っ黒にならないよう、明るめのグレーで建物・道・川を描き分ける
+  dark: [
+    ...HIDE,
+    { elementType:"labels.text.fill", stylers:[{color:"#b4c0b9"}] },
+    { elementType:"labels.text.stroke", stylers:[{color:"#2b3430"}] },
+    { featureType:"landscape", elementType:"geometry", stylers:[{color:"#2b3430"}] },
+    { featureType:"landscape.man_made", elementType:"geometry.fill", stylers:[{color:"#3a4540"}] },
+    { featureType:"landscape.man_made", elementType:"geometry.stroke", stylers:[{color:"#4b5751"}] },
+    { featureType:"landscape.natural.landcover", elementType:"geometry", stylers:[{color:"#344a39"}] },
+    { featureType:"poi.park", elementType:"geometry", stylers:[{color:"#344a39"}] },
+    { featureType:"poi.park", elementType:"labels.text.fill", stylers:[{color:"#9cc08a"}] },
+    { featureType:"road", elementType:"geometry.fill", stylers:[{color:"#5a665f"}] },
+    { featureType:"road", elementType:"geometry.stroke", stylers:[{color:"#414c47"}] },
+    { featureType:"road.highway", elementType:"geometry.fill", stylers:[{color:"#4a5550"}] },
+    { featureType:"water", elementType:"geometry", stylers:[{color:"#2f5161"}] },
+    { featureType:"water", elementType:"labels.text.fill", stylers:[{color:"#8fb3c4"}] },
+  ],
 };
 const darkMQ = window.matchMedia("(prefers-color-scheme: dark)");
 const routeColor = () => darkMQ.matches ? "#74b6d6" : "#2c6e8f";
